@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/utils/providers.dart';
+import 'bill_details_screen.dart';
+
 
 class ReportsScreen extends ConsumerStatefulWidget {
   const ReportsScreen({super.key});
@@ -145,8 +147,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                             fontWeight: FontWeight.bold),
                       ),
                       onTap: () {
-                        // Later: Open bill details & reprint
-                      },
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => BillDetailsScreen(bill: bill),
+    ),
+  );
+},
                     ),
                   );
                 },

@@ -58,4 +58,16 @@ Future<List<Map<String, dynamic>>> getBillsByRange(
     orderBy: 'date DESC',
   );
 }
+Future<List<Map<String, dynamic>>> getBillItems(int billId) async {
+  final db = await AppDatabase.instance.database;
+
+  return await db.rawQuery('''
+    SELECT p.name,
+           bi.quantity,
+           bi.price
+    FROM bill_items bi
+    JOIN products p ON bi.product_id = p.id
+    WHERE bi.bill_id = ?
+  ''', [billId]);
+}
 }

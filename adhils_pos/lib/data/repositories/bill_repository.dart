@@ -24,4 +24,8 @@ class BillRepository {
       DateTime start, DateTime end) async {
     return await _localDataSource.getBillsByRange(start, end);
   }
+
+  Future<List<Map<String, dynamic>>> getBillItems(int billId) async {
+  return await _localDataSource.getBillItems(billId);
+}
 }
