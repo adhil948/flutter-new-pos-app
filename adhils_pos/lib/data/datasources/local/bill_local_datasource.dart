@@ -13,4 +13,49 @@ class BillLocalDataSource {
     final db = await AppDatabase.instance.database;
     await db.insert('bill_items', item.toMap());
   }
+
+Future<Map<String, dynamic>> getTodayReport() async {
+  final db = await AppDatabase.instance.database;
+
+  final now = DateTime.now();
+  final start = DateTime(now.year, now.month, now.day);
+  final end = start.add(const Duration(days: 1));
+
+  final result = await db.rawQuery('''
+    SELECT COUNT(*) as total_bills,
+           SUM(total) as total_sales
+    FROM bills
+    WHERE date >= ? AND date < ?
+  ''', [start.toIso8601String(), end.toIso8601String()]);
+
+  return result.first;
+}
+
+Future<Map<String, dynamic>> getReportByRange(
+    DateTime start, DateTime end) async {
+  final db = await AppDatabase.instance.database;
+
+  final result = await db.rawQuery('''
+    SELECT COUNT(*) as total_bills,
+           SUM(total) as total_sales
+    FROM bills
+    WHERE date >= ? AND date < ?
+  ''', [start.toIso8601String(), end.toIso8601String()]);
+
+  return result.first;
+}
+Future<List<Map<String, dynamic>>> getBillsByRange(
+    DateTime start, DateTime end) async {
+  final db = await AppDatabase.instance.database;
+
+  return await db.query(
+    'bills',
+    where: 'date >= ? AND date < ?',
+    whereArgs: [
+      start.toIso8601String(),
+      end.toIso8601String()
+    ],
+    orderBy: 'date DESC',
+  );
+}
 }

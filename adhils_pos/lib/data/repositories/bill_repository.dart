@@ -14,4 +14,14 @@ class BillRepository {
   Future<void> addBillItem(BillItem item) async {
     await _localDataSource.insertBillItem(item);
   }
+
+  Future<Map<String, dynamic>> getReportByRange(
+      DateTime start, DateTime end) async {
+    return await _localDataSource.getReportByRange(start, end);
+  }
+
+  Future<List<Map<String, dynamic>>> getBillsByRange(
+      DateTime start, DateTime end) async {
+    return await _localDataSource.getBillsByRange(start, end);
+  }
 }

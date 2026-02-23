@@ -66,8 +66,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final billRepo = ref.read(billRepositoryProvider);
 
     final bill = Bill(
-      date: DateFormat('yyyy-MM-dd HH:mm:ss')
-          .format(DateTime.now()),
+    date: DateTime.now().toIso8601String(),
       total: total,
       paymentType: "Cash",
     );

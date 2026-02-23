@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'products_screen.dart';
 import 'new_bill_screen.dart';
+import 'reports_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -43,11 +45,18 @@ DashboardCard(
       );
     },
   ),
-  DashboardCard(
-    title: "Reports",
-    icon: Icons.bar_chart,
-    onTap: () {},
-  ),
+DashboardCard(
+  title: "Reports",
+  icon: Icons.bar_chart,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ReportsScreen(),
+      ),
+    );
+  },
+),
   DashboardCard(
     title: "Expenses",
     icon: Icons.money,
