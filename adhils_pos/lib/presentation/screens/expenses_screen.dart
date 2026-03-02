@@ -295,31 +295,80 @@ IconButton(
 
             const Divider(),
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: expenses.length,
-                itemBuilder: (context, index) {
-                  final e = expenses[index];
-                  final date =
-                      DateFormat('dd MMM yyyy – hh:mm a')
-                          .format(DateTime.parse(e.date));
+Expanded(
+  child: ListView.builder(
+    itemCount: expenses.length,
+    itemBuilder: (context, index) {
+      final e = expenses[index];
+      final date =
+          DateFormat('dd MMM yyyy – hh:mm a')
+              .format(DateTime.parse(e.date));
 
-                  return ListTile(
-                    title: Text(
-                      getCategoryName(e.categoryId),
-                    ),
-                    subtitle: Text(
-                      "${e.note ?? ''}\n$date",
-                    ),
-                    trailing: Text(
-                      "₹ ${e.amount}",
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold),
-                    ),
-                  );
-                },
-              ),
+      return Dismissible(
+        key: Key(e.id.toString()),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          color: Colors.red,
+          child: const Icon(
+            Icons.delete,
+            color: Colors.white,
+          ),
+        ),
+        confirmDismiss: (_) async {
+          return await showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text("Delete Expense"),
+              content: const Text(
+                  "Are you sure you want to delete this expense?"),
+              actions: [
+                TextButton(
+                  onPressed: () =>
+                      Navigator.pop(context, false),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.pop(context, true),
+                  child: const Text("Delete"),
+                ),
+              ],
             ),
+          );
+        },
+        onDismissed: (_) async {
+          await ref
+              .read(expenseRepositoryProvider)
+              .deleteExpense(e.id!);
+
+          loadExpenses();
+
+          ScaffoldMessenger.of(context)
+              .showSnackBar(
+            const SnackBar(
+              content: Text("Expense deleted"),
+            ),
+          );
+        },
+        child: ListTile(
+          title: Text(
+            getCategoryName(e.categoryId),
+          ),
+          subtitle: Text(
+            "${e.note ?? ''}\n$date",
+          ),
+          trailing: Text(
+            "₹ ${e.amount}",
+            style: const TextStyle(
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    },
+  ),
+),
           ],
         ),
       ),
