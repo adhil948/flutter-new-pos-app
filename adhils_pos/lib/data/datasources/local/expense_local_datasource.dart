@@ -71,4 +71,20 @@ Future<List<Map<String, dynamic>>> getCategoryExpenseBreakdown(
     ORDER BY total_amount DESC
   ''', [start.toIso8601String(), end.toIso8601String()]);
 }
+
+Future<List<Map<String, dynamic>>> getDailyExpenseSummary(
+    DateTime start, DateTime end) async {
+
+  final db = await AppDatabase.instance.database;
+
+  return await db.rawQuery('''
+    SELECT DATE(date) as day,
+           SUM(amount) as total_expense
+    FROM expenses
+    WHERE date >= ? AND date < ?
+    GROUP BY day
+    ORDER BY day ASC
+  ''', [start.toIso8601String(), end.toIso8601String()]);
+}
+
 }

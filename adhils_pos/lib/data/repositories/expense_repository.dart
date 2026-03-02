@@ -33,4 +33,10 @@ Future<List<Map<String, dynamic>>> getCategoryExpenseBreakdown(
   return await _localDataSource
       .getCategoryExpenseBreakdown(start, end);
 }
+Future<List<Map<String, dynamic>>> getDailyExpenseSummary(
+    DateTime start, DateTime end) async {
+  return await _localDataSource
+      .getDailyExpenseSummary(start, end);
+}
+
 }

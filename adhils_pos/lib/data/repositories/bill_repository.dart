@@ -43,4 +43,14 @@ Future<List<Map<String, dynamic>>> getProductSalesByRange(
   return await _localDataSource
       .getProductSalesByRange(start, end);
 }
+
+Future<List<Map<String, dynamic>>> getDailySummaryByRange(
+    DateTime start, DateTime end) async {
+  return await _localDataSource
+      .getDailySummaryByRange(start, end);
+}
+
+Future<String> generateBillNumber() async {
+  return await _localDataSource.generateBillNumber();
+}
 }

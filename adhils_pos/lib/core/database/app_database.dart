@@ -19,7 +19,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
     );
   }
@@ -37,6 +37,7 @@ class AppDatabase {
     await db.execute('''
       CREATE TABLE bills (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bill_number TEXT NOT NULL,
         date TEXT NOT NULL,
         total REAL NOT NULL,
         payment_type TEXT NOT NULL

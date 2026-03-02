@@ -1,6 +1,7 @@
 import 'package:adhils_pos/core/database/app_database.dart';
 import '../../models/bill_model.dart';
 import '../../models/bill_item_model.dart';
+import 'package:intl/intl.dart';
 
 class BillLocalDataSource {
 
@@ -128,5 +129,45 @@ Future<List<Map<String, dynamic>>> getProductSalesByRange(
     GROUP BY p.name
     ORDER BY total_amount DESC
   ''', [start.toIso8601String(), end.toIso8601String()]);
+}
+Future<List<Map<String, dynamic>>> getDailySummaryByRange(
+    DateTime start, DateTime end) async {
+
+  final db = await AppDatabase.instance.database;
+
+  return await db.rawQuery('''
+    SELECT DATE(date) as day,
+           SUM(total) as total_sales
+    FROM bills
+    WHERE date >= ? AND date < ?
+    GROUP BY day
+    ORDER BY day ASC
+  ''', [start.toIso8601String(), end.toIso8601String()]);
+}
+
+
+Future<String> generateBillNumber() async {
+  final db = await AppDatabase.instance.database;
+
+  final now = DateTime.now();
+
+  final month =
+      DateFormat('MMM').format(now).toUpperCase();
+
+  final monthNumber =
+      DateFormat('MM').format(now);
+
+  final count = await db.rawQuery('''
+    SELECT COUNT(*) as c
+    FROM bills
+    WHERE strftime('%m', date) = ?
+  ''', [monthNumber]);
+
+  final running =
+      ((count.first['c'] as int) + 1)
+          .toString()
+          .padLeft(3, '0');
+
+  return "$month-$running";
 }
 }

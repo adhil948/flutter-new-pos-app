@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/utils/providers.dart';
+import '../../core/services/pdf_service.dart';
 
 class ReportsScreen extends ConsumerStatefulWidget {
   const ReportsScreen({super.key});
@@ -175,6 +176,42 @@ DropdownButton<String>(
 
       loadReport();
     }
+  },
+),
+IconButton(
+  icon: const Icon(Icons.print),
+  onPressed: () async {
+
+    final billRepo = ref.read(billRepositoryProvider);
+    final expenseRepo = ref.read(expenseRepositoryProvider);
+
+    final range = getRange();
+
+    final dailySales =
+        await billRepo.getDailySummaryByRange(
+            range.start, range.end);
+
+    final dailyExpenses =
+        await expenseRepo.getDailyExpenseSummary(
+            range.start, range.end);
+
+    for (var bill in bills) {
+  final items = await billRepo.getBillItems(bill['id']);
+  bill['items'] = items;
+}
+
+    await PdfService.generateSmartReport(
+      filter: selectedFilter,
+      range: range,
+      totalSales: totalSales,
+      totalExpenses: totalExpenses,
+      profit: profit,
+      paymentBreakdown: paymentBreakdown,
+      bills: bills,
+      expenses: expenses,
+      dailySales: dailySales,
+      dailyExpenses: dailyExpenses,
+    );
   },
 ),
 

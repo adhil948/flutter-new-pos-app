@@ -62,18 +62,25 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     });
   }
 
+ 
+
   Future<void> saveBill() async {
     if (cart.isEmpty) return;
 
     final billRepo = ref.read(billRepositoryProvider);
+     final billNumber =
+    await billRepo.generateBillNumber();
 
-    final bill = Bill(
-    date: DateTime.now().toIso8601String(),
-      total: total,
-      paymentType: selectedPayment,
-    );
+final bill = Bill(
+  billNumber: billNumber,
+  date: DateTime.now().toIso8601String(),
+  total: total,
+  paymentType: selectedPayment,
+);
 
     final billId = await billRepo.createBill(bill);
+
+
 
     for (var entry in cart.entries) {
       final item = BillItem(
