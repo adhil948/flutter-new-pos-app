@@ -17,4 +17,14 @@ class ExpenseRepository {
   Future<void> deleteExpense(int id) async {
     await _localDataSource.deleteExpense(id);
   }
+
+  Future<List<Map<String, dynamic>>> getExpensesByRange(
+    DateTime start, DateTime end) async {
+  return await _localDataSource.getExpensesByRange(start, end);
+}
+
+Future<double> getTotalExpenseByRange(
+    DateTime start, DateTime end) async {
+  return await _localDataSource.getTotalExpenseByRange(start, end);
+}
 }

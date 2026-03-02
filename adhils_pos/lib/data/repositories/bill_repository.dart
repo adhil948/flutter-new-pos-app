@@ -28,4 +28,13 @@ class BillRepository {
   Future<List<Map<String, dynamic>>> getBillItems(int billId) async {
   return await _localDataSource.getBillItems(billId);
 }
+
+Future<void> deleteBill(int billId) async {
+  await _localDataSource.deleteBill(billId);
+}
+
+Future<Map<String, double>> getPaymentBreakdown(
+    DateTime start, DateTime end) async {
+  return await _localDataSource.getPaymentBreakdown(start, end);
+}
 }
