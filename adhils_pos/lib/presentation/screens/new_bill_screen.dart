@@ -18,6 +18,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   List<Product> products = [];
   Map<Product, int> cart = {};
 
+  String selectedPayment = "Cash";
+
   @override
   void initState() {
     super.initState();
@@ -68,7 +70,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final bill = Bill(
     date: DateTime.now().toIso8601String(),
       total: total,
-      paymentType: "Cash",
+      paymentType: selectedPayment,
     );
 
     final billId = await billRepo.createBill(bill);
@@ -174,6 +176,21 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
                         fontWeight: FontWeight.bold),
                   ),
                 ),
+
+                DropdownButton<String>(
+  value: selectedPayment,
+  items: const [
+    DropdownMenuItem(value: "Cash", child: Text("Cash")),
+    DropdownMenuItem(value: "UPI", child: Text("UPI")),
+    DropdownMenuItem(value: "Bank", child: Text("Bank Transfer")),
+    DropdownMenuItem(value: "Card", child: Text("Card")),
+  ],
+  onChanged: (value) {
+    setState(() {
+      selectedPayment = value!;
+    });
+  },
+),
 
                 ElevatedButton(
                   onPressed: saveBill,

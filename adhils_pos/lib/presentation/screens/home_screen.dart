@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'products_screen.dart';
 import 'new_bill_screen.dart';
 import 'reports_screen.dart';
+import 'expenses_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -57,11 +58,18 @@ DashboardCard(
     );
   },
 ),
-  DashboardCard(
-    title: "Expenses",
-    icon: Icons.money,
-    onTap: () {},
-  ),
+DashboardCard(
+  title: "Expenses",
+  icon: Icons.money,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ExpensesScreen(),
+      ),
+    );
+  },
+),
 ],
         ),
       ),

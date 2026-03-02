@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/utils/providers.dart';
 import 'bill_details_screen.dart';
+import '../../core/services/pdf_service.dart';
 
 
 class ReportsScreen extends ConsumerStatefulWidget {
@@ -98,7 +99,19 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                 loadReport();
               },
             ),
+ElevatedButton(
+  onPressed: () async {
+    final file = await PdfService.generateReportPdf(
+      title: selectedFilter + " Report",
+      totalBills: totalBills,
+      totalSales: totalSales,
+      bills: bills,
+    );
 
+    await PdfService.printPdf(file);
+  },
+  child: const Text("Export / Print PDF"),
+),
             const SizedBox(height: 10),
 
             // SUMMARY

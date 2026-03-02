@@ -19,7 +19,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: _createDB,
     );
   }
@@ -53,14 +53,23 @@ class AppDatabase {
       )
     ''');
 
-    await db.execute('''
-      CREATE TABLE expenses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT NOT NULL,
-        amount REAL NOT NULL,
-        description TEXT NOT NULL
-      )
-    ''');
+await db.execute('''
+  CREATE TABLE expense_categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+  )
+''');
+
+await db.execute('''
+  CREATE TABLE expenses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    amount REAL NOT NULL,
+    category_id INTEGER NOT NULL,
+    note TEXT,
+    FOREIGN KEY (category_id) REFERENCES expense_categories(id)
+  )
+''');
   }
 
   Future close() async {
