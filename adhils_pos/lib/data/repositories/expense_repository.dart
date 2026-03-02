@@ -27,4 +27,10 @@ Future<double> getTotalExpenseByRange(
     DateTime start, DateTime end) async {
   return await _localDataSource.getTotalExpenseByRange(start, end);
 }
+
+Future<List<Map<String, dynamic>>> getCategoryExpenseBreakdown(
+    DateTime start, DateTime end) async {
+  return await _localDataSource
+      .getCategoryExpenseBreakdown(start, end);
+}
 }

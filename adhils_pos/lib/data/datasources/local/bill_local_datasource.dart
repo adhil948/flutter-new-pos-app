@@ -110,4 +110,23 @@ Future<void> deleteBill(int billId) async {
     whereArgs: [billId],
   );
 }
+
+
+Future<List<Map<String, dynamic>>> getProductSalesByRange(
+    DateTime start, DateTime end) async {
+
+  final db = await AppDatabase.instance.database;
+
+  return await db.rawQuery('''
+    SELECT p.name,
+           SUM(bi.quantity) as total_qty,
+           SUM(bi.quantity * bi.price) as total_amount
+    FROM bill_items bi
+    JOIN bills b ON bi.bill_id = b.id
+    JOIN products p ON bi.product_id = p.id
+    WHERE b.date >= ? AND b.date < ?
+    GROUP BY p.name
+    ORDER BY total_amount DESC
+  ''', [start.toIso8601String(), end.toIso8601String()]);
+}
 }

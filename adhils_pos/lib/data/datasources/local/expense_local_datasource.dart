@@ -54,4 +54,21 @@ Future<double> getTotalExpenseByRange(
   final value = result.first['total'];
   return value == null ? 0.0 : (value as num).toDouble();
 }
+
+Future<List<Map<String, dynamic>>> getCategoryExpenseBreakdown(
+    DateTime start, DateTime end) async {
+
+  final db = await AppDatabase.instance.database;
+
+  return await db.rawQuery('''
+    SELECT c.name,
+           SUM(e.amount) as total_amount
+    FROM expenses e
+    JOIN expense_categories c
+    ON e.category_id = c.id
+    WHERE e.date >= ? AND e.date < ?
+    GROUP BY c.name
+    ORDER BY total_amount DESC
+  ''', [start.toIso8601String(), end.toIso8601String()]);
+}
 }

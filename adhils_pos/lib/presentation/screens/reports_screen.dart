@@ -23,6 +23,7 @@ class _ReportsScreenState
   double totalSales = 0;
   double totalExpenses = 0;
   double profit = 0;
+  DateTimeRange? customRange;
 
   Map<String, double> paymentBreakdown = {};
 
@@ -36,38 +37,42 @@ class _ReportsScreenState
     loadReport();
   }
 
-  DateTimeRange getRange() {
-    final now = DateTime.now();
+DateTimeRange getRange() {
+  final now = DateTime.now();
 
-    if (selectedFilter == "Today") {
-      final start = DateTime(now.year, now.month, now.day);
-      return DateTimeRange(
-          start: start,
-          end: start.add(const Duration(days: 1)));
-    }
-
-    if (selectedFilter == "This Week") {
-      final start =
-          now.subtract(Duration(days: now.weekday - 1));
-      final cleanStart =
-          DateTime(start.year, start.month, start.day);
-      return DateTimeRange(
-          start: cleanStart,
-          end: cleanStart.add(const Duration(days: 7)));
-    }
-
-    if (selectedFilter == "This Month") {
-      final start = DateTime(now.year, now.month, 1);
-      final end =
-          DateTime(now.year, now.month + 1, 1);
-      return DateTimeRange(start: start, end: end);
-    }
-
-    return DateTimeRange(
-      start: DateTime(2000),
-      end: DateTime(2100),
-    );
+  if (selectedFilter == "Custom" && customRange != null) {
+    return customRange!;
   }
+
+  if (selectedFilter == "Today") {
+    final start = DateTime(now.year, now.month, now.day);
+    return DateTimeRange(
+        start: start,
+        end: start.add(const Duration(days: 1)));
+  }
+
+  if (selectedFilter == "This Week") {
+    final start =
+        now.subtract(Duration(days: now.weekday - 1));
+    final cleanStart =
+        DateTime(start.year, start.month, start.day);
+    return DateTimeRange(
+        start: cleanStart,
+        end: cleanStart.add(const Duration(days: 7)));
+  }
+
+  if (selectedFilter == "This Month") {
+    final start = DateTime(now.year, now.month, 1);
+    final end =
+        DateTime(now.year, now.month + 1, 1);
+    return DateTimeRange(start: start, end: end);
+  }
+
+  return DateTimeRange(
+    start: DateTime(2000),
+    end: DateTime(2100),
+  );
+}
 
   Future<void> loadReport() async {
     final billRepo =
@@ -96,6 +101,8 @@ class _ReportsScreenState
     final payment =
         await billRepo.getPaymentBreakdown(
             range.start, range.end);
+
+          
 
     setState(() {
       totalBills = summary['total_bills'] ?? 0;
@@ -129,28 +136,47 @@ class _ReportsScreenState
         children: [
 
           // FILTER
-          DropdownButton<String>(
-            value: selectedFilter,
-            items: const [
-              DropdownMenuItem(
-                  value: "Today", child: Text("Today")),
-              DropdownMenuItem(
-                  value: "This Week",
-                  child: Text("This Week")),
-              DropdownMenuItem(
-                  value: "This Month",
-                  child: Text("This Month")),
-              DropdownMenuItem(
-                  value: "All Time",
-                  child: Text("All Time")),
-            ],
-            onChanged: (value) {
-              setState(() {
-                selectedFilter = value!;
-              });
-              loadReport();
-            },
-          ),
+DropdownButton<String>(
+  value: selectedFilter,
+  items: const [
+    DropdownMenuItem(value: "Today", child: Text("Today")),
+    DropdownMenuItem(value: "This Week", child: Text("This Week")),
+    DropdownMenuItem(value: "This Month", child: Text("This Month")),
+    DropdownMenuItem(value: "All Time", child: Text("All Time")),
+    DropdownMenuItem(value: "Custom", child: Text("Custom Range")),
+  ],
+  onChanged: (value) async {
+    if (value == null) return;
+
+    if (value == "Custom") {
+
+      final picked = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+        initialDateRange: customRange,
+      );
+
+      if (picked != null) {
+        setState(() {
+          selectedFilter = "Custom";
+          customRange = picked;
+        });
+
+        loadReport();
+      }
+
+    } else {
+
+      setState(() {
+        selectedFilter = value;
+        customRange = null;
+      });
+
+      loadReport();
+    }
+  },
+),
 
           // SUMMARY CARDS
           Row(
@@ -186,9 +212,66 @@ class _ReportsScreenState
                 buildOverview(),
                 buildBills(),
                 buildExpenses(),
-                const Center(
-                    child: Text(
-                        "Analytics coming next")),
+                FutureBuilder(
+  future: Future.wait([
+    ref.read(billRepositoryProvider)
+        .getProductSalesByRange(
+            getRange().start, getRange().end),
+    ref.read(expenseRepositoryProvider)
+        .getCategoryExpenseBreakdown(
+            getRange().start, getRange().end),
+  ]),
+  builder: (context, snapshot) {
+
+    if (!snapshot.hasData) {
+      return const Center(
+          child: CircularProgressIndicator());
+    }
+
+    final productSales =
+        snapshot.data![0] as List<Map<String, dynamic>>;
+
+    final categoryExpenses =
+        snapshot.data![1] as List<Map<String, dynamic>>;
+
+    return ListView(
+      children: [
+
+        const Padding(
+          padding: EdgeInsets.all(8),
+          child: Text("Product Sales",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold)),
+        ),
+
+        ...productSales.map((p) =>
+            ListTile(
+              title: Text(p['name']),
+              subtitle:
+                  Text("Qty: ${p['total_qty']}"),
+              trailing: Text(
+                  "₹${p['total_amount']}"),
+            )),
+
+        const Divider(),
+
+        const Padding(
+          padding: EdgeInsets.all(8),
+          child: Text("Expense Categories",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold)),
+        ),
+
+        ...categoryExpenses.map((c) =>
+            ListTile(
+              title: Text(c['name']),
+              trailing: Text(
+                  "₹${c['total_amount']}"),
+            )),
+      ],
+    );
+  },
+),
               ],
             ),
           )

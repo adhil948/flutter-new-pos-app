@@ -37,4 +37,10 @@ Future<Map<String, double>> getPaymentBreakdown(
     DateTime start, DateTime end) async {
   return await _localDataSource.getPaymentBreakdown(start, end);
 }
+
+Future<List<Map<String, dynamic>>> getProductSalesByRange(
+    DateTime start, DateTime end) async {
+  return await _localDataSource
+      .getProductSalesByRange(start, end);
+}
 }
