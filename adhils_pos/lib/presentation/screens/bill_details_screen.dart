@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/utils/providers.dart';
+import '../../core/services/pdf_service.dart';
 
 class BillDetailsScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> bill;
@@ -55,6 +56,30 @@ class _BillDetailsScreenState
 
             Text("Payment: ${widget.bill['payment_type']}"),
 
+            if (widget.bill['note'] != null && widget.bill['note'].toString().isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Note:",
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(widget.bill['note']),
+                  ],
+                ),
+              ),
+            ],
+
             const Divider(),
 
             Expanded(
@@ -64,11 +89,12 @@ class _BillDetailsScreenState
                   final item = items[index];
 
                   return ListTile(
-                    title: Text(item['name']),
+                    title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.w600)),
                     subtitle: Text(
                         "₹ ${item['price']} x ${item['quantity']}"),
                     trailing: Text(
-                        "₹ ${(item['price'] * item['quantity']).toStringAsFixed(2)}"),
+                        "₹ ${(item['price'] * item['quantity']).toStringAsFixed(2)}",
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
                   );
                 },
               ),
@@ -76,20 +102,43 @@ class _BillDetailsScreenState
 
             const Divider(),
 
-            Text(
-              "Total: ₹ ${widget.bill['total']}",
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Total Amount:", style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  Text(
+                    "₹ ${widget.bill['total']}",
+                    style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple),
+                  ),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
             ElevatedButton(
-              onPressed: () {
-                // print logic later
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
+              onPressed: () async {
+                await PdfService.generateInvoice(
+                  bill: widget.bill,
+                  items: items,
+                );
               },
-              child: const Text("Print Bill"),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.print),
+                  SizedBox(width: 8),
+                  Text("Print Bill", style: TextStyle(fontSize: 16)),
+                ],
+              ),
             ),
           ],
         ),

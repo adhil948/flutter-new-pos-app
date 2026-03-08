@@ -4,6 +4,7 @@ class Bill {
   final String date;
   final double total;
   final String paymentType;
+  final String? note;
 
   Bill({
     this.id,
@@ -11,6 +12,7 @@ class Bill {
     required this.date,
     required this.total,
     required this.paymentType,
+    this.note,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +22,7 @@ class Bill {
       'date': date,
       'total': total,
       'payment_type': paymentType,
+      'note': note,
     };
   }
 
@@ -30,6 +33,7 @@ class Bill {
       date: map['date'],
       total: map['total'],
       paymentType: map['payment_type'],
+      note: map['note'],
     );
   }
 }

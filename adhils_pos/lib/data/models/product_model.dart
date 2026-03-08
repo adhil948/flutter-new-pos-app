@@ -3,12 +3,14 @@ class Product {
   final String name;
   final double price;
   final String createdAt;
+  final String? imagePath;
 
   Product({
     this.id,
     required this.name,
     required this.price,
     required this.createdAt,
+    this.imagePath,
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class Product {
       'name': name,
       'price': price,
       'created_at': createdAt,
+      'image_path': imagePath,
     };
   }
 
@@ -26,6 +29,7 @@ class Product {
       name: map['name'],
       price: map['price'],
       createdAt: map['created_at'],
+      imagePath: map['image_path'],
     );
   }
 }

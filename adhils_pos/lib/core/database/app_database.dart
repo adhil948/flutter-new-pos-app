@@ -19,9 +19,19 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 6,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
+  }
+
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 5) {
+      await db.execute('ALTER TABLE products ADD COLUMN image_path TEXT;');
+    }
+    if (oldVersion < 6) {
+      await db.execute('ALTER TABLE bills ADD COLUMN note TEXT;');
+    }
   }
 
   Future _createDB(Database db, int version) async {
@@ -30,7 +40,8 @@ class AppDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         price REAL NOT NULL,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        image_path TEXT
       )
     ''');
 
@@ -40,7 +51,8 @@ class AppDatabase {
         bill_number TEXT NOT NULL,
         date TEXT NOT NULL,
         total REAL NOT NULL,
-        payment_type TEXT NOT NULL
+        payment_type TEXT NOT NULL,
+        note TEXT
       )
     ''');
 

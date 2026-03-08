@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/utils/providers.dart';
 import '../../core/services/pdf_service.dart';
+import 'bill_details_screen.dart';
 
 class ReportsScreen extends ConsumerStatefulWidget {
   const ReportsScreen({super.key});
@@ -195,10 +196,14 @@ IconButton(
         await expenseRepo.getDailyExpenseSummary(
             range.start, range.end);
 
+    List<Map<String, dynamic>> modifiableBills = [];
     for (var bill in bills) {
-  final items = await billRepo.getBillItems(bill['id']);
-  bill['items'] = items;
-}
+      final items = await billRepo.getBillItems(bill['id']);
+      modifiableBills.add({
+        ...bill,
+        'items': items,
+      });
+    }
 
     await PdfService.generateSmartReport(
       filter: selectedFilter,
@@ -207,7 +212,7 @@ IconButton(
       totalExpenses: totalExpenses,
       profit: profit,
       paymentBreakdown: paymentBreakdown,
-      bills: bills,
+      bills: modifiableBills,
       expenses: expenses,
       dailySales: dailySales,
       dailyExpenses: dailyExpenses,
@@ -272,38 +277,58 @@ IconButton(
         snapshot.data![1] as List<Map<String, dynamic>>;
 
     return ListView(
+      padding: const EdgeInsets.all(16),
       children: [
-
-        const Padding(
-          padding: EdgeInsets.all(8),
-          child: Text("Product Sales",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold)),
-        ),
-
-        ...productSales.map((p) =>
-            ListTile(
-              title: Text(p['name']),
-              subtitle:
-                  Text("Qty: ${p['total_qty']}"),
-              trailing: Text(
-                  "₹${p['total_amount']}"),
+        const Text("Top Sold Products",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple)),
+        const SizedBox(height: 10),
+        if (productSales.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Text("No product sales data for this range.", style: TextStyle(color: Colors.grey)),
+          ),
+        ...productSales.map((p) => Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              elevation: 0,
+              color: Colors.deepPurple.withOpacity(0.05),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.deepPurple,
+                  child: Text("${p['total_qty']}", style: const TextStyle(color: Colors.white, fontSize: 12)),
+                ),
+                title: Text(p['name'], style: const TextStyle(fontWeight: FontWeight.w600)),
+                trailing: Text(
+                  "₹${p['total_amount']}",
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                ),
+              ),
             )),
 
+        const SizedBox(height: 20),
         const Divider(),
+        const SizedBox(height: 20),
 
-        const Padding(
-          padding: EdgeInsets.all(8),
-          child: Text("Expense Categories",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold)),
-        ),
-
-        ...categoryExpenses.map((c) =>
-            ListTile(
-              title: Text(c['name']),
-              trailing: Text(
-                  "₹${c['total_amount']}"),
+        const Text("Expense Breakdown",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 18, color: Colors.redAccent)),
+        const SizedBox(height: 10),
+        if (categoryExpenses.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Text("No expense data for this range.", style: TextStyle(color: Colors.grey)),
+          ),
+        ...categoryExpenses.map((c) => Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              elevation: 0,
+              color: Colors.redAccent.withOpacity(0.05),
+              child: ListTile(
+                title: Text(c['name'], style: const TextStyle(fontWeight: FontWeight.w600)),
+                trailing: Text(
+                  "₹${c['total_amount']}",
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent),
+                ),
+              ),
             )),
       ],
     );
@@ -348,6 +373,13 @@ IconButton(
             ListTile(
               title: Text(
                   "Bill #${b['id']} - ₹${b['total']}"),
+              subtitle: Text(DateFormat('dd MMM yyyy – hh:mm a').format(DateTime.parse(b['date']))),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => BillDetailsScreen(bill: b)),
+                );
+              },
             )),
 
         const Padding(
@@ -391,8 +423,17 @@ IconButton(
           child: ListTile(
             title: Text(
                 "Bill #${bill['id']} - ₹${bill['total']}"),
-            subtitle:
-                Text(bill['payment_type']),
+            subtitle: Text(
+                "${bill['payment_type']} • ${DateFormat('dd MMM yyyy – hh:mm a').format(DateTime.parse(bill['date']))}"),
+            trailing: bill['note'] != null && bill['note'].toString().isNotEmpty
+                ? const Icon(Icons.note, color: Colors.deepPurple, size: 20)
+                : null,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => BillDetailsScreen(bill: bill)),
+              );
+            },
           ),
         );
       },

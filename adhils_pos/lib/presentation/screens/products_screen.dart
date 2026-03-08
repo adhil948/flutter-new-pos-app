@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/providers.dart';
@@ -42,6 +43,25 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               itemBuilder: (context, index) {
                 final product = products[index];
                 return ListTile(
+                  leading: product.imagePath != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(product.imagePath!),
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.image, color: Colors.grey),
+                        ),
                   title: Text(product.name),
                   subtitle: Text("₹ ${product.price}"),
                   trailing: IconButton(
